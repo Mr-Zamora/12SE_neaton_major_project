@@ -1,0 +1,14 @@
+{% extends 'layout.html' %}
+{% block title %}Player Detail - NBA Simulator{% endblock %}
+{% block content %}
+<h2>{{ player.name }}</h2>
+<img src="{{ player.photo_url }}" alt="{{ player.name }}" width="150">
+<ul>
+  <li><strong>Team:</strong> {{ player.team }}</li>
+  <li><strong>Position:</strong> {{ player.position }}</li>
+  <li><strong>Points:</strong> {{ player.points }}</li>
+  <li><strong>Rebounds:</strong> {{ player.rebounds }}</li>
+  <li><strong>Assists:</strong> {{ player.assists }}</li>
+</ul>
+<a href="/players">Back to Players</a>
+{% endblock %}

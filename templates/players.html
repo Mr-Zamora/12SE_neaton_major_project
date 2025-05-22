@@ -1,0 +1,12 @@
+{% extends 'layout.html' %}
+{% block title %}Players - NBA Simulator{% endblock %}
+{% block content %}
+<h2>All NBA Players</h2>
+<ul>
+  {% for player in players %}
+    <li>
+      <a href="/player/{{ player.id }}">{{ player.name }}</a> - {{ player.team }} ({{ player.position }})
+    </li>
+  {% endfor %}
+</ul>
+{% endblock %}

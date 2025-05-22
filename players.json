@@ -1,0 +1,45 @@
+[
+  {
+    "id": 1,
+    "name": "LeBron James",
+    "team": "Los Angeles Lakers",
+    "position": "SF,PG",
+    "points": 24.4,
+    "rebounds": 8.2,
+    "assists": 7.8,
+    "photo_url": "https://s.yimg.com/ny/api/res/1.2/oPuUdYq.C8GaQybuGH.bEg--/YXBwaWQ9aGlnaGxhbmRlcjt3PTEyMDA7aD03OTk-/https://media.zenfs.com/en/att_bleacher_report_articles_694/710fafc2d2ceedb1194e5966cb550abc"
+  },
+  {
+    "id": 2,
+    "name": "Stephen Curry",
+    "team": "Golden State Warriors",
+    "position": "PG",
+    "points": 24.7,
+    "rebounds": 4.7,
+    "assists": 6.4,
+    "photo_url": "https://images.daznservices.com/di/library/sporting_news/3f/3f/stephen-curry-ftr_1brlc3k3jwvwr1fjrw3y1k16pj.jpeg?t=-1655920530&quality=100"
+  },
+  {
+    "id": 3,
+    "name": "Giannis Antetokounmpo",
+    "team": "Milwaukee Bucks",
+    "position": "PF,C",
+    "points": 30.4,
+    "rebounds": 11.9,
+    "assists": 6.5,
+    "photo_url": "https://sports.inquirer.net/files/2021/11/063_1352747760-scaled.jpg"
+  },
+  { 
+    "id": 4,
+    "name": "Victor Wembanyama",
+    "team": "San Antonio Spurs",
+    "position": "PF,C",
+    "points": 24.3,
+    "rebounds": 11.0,
+    "assists": 3.7,
+    "photo_url": "https://th.bing.com/th/id/OIP.vUO_bbW9Qyv15AHnDg6IAQHaE8?rs=1&pid=ImgDetMain"
+  }
+]
+
+
+

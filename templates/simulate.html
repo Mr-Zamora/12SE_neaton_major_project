@@ -1,0 +1,29 @@
+{% extends 'layout.html' %}
+{% block title %}Simulate Matchup - NBA Simulator{% endblock %}
+{% block content %}
+<h2>Simulate Matchup</h2>
+<form method="post">
+  <label for="player1">Player 1:</label>
+  <select name="player1" id="player1">
+    {% for player in players %}
+      <option value="{{ player.id }}">{{ player.name }}</option>
+    {% endfor %}
+  </select>
+  <label for="player2">Player 2:</label>
+  <select name="player2" id="player2">
+    {% for player in players %}
+      <option value="{{ player.id }}">{{ player.name }}</option>
+    {% endfor %}
+  </select>
+  <button type="submit">Simulate</button>
+</form>
+{% if sim_result %}
+  <h3>Simulation Result:</h3>
+  <ul>
+    <li><strong>{{ sim_result.player1.name }}</strong> vs <strong>{{ sim_result.player2.name }}</strong></li>
+    <li>Winner: <strong>{{ sim_result.winner.name }}</strong></li>
+  </ul>
+{% endif %}
+<h3>AI Commentary</h3>
+<p>{{ ai_commentary }}</p>
+{% endblock %}
