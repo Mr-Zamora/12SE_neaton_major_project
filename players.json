@@ -1,45 +1,244 @@
 [
+  // Houston Rockets (based on 2023-2024 roster)
   {
     "id": 1,
-    "name": "LeBron James",
-    "team": "Los Angeles Lakers",
-    "position": "SF,PG",
-    "points": 24.4,
-    "rebounds": 8.2,
-    "assists": 7.8,
-    "photo_url": "https://s.yimg.com/ny/api/res/1.2/oPuUdYq.C8GaQybuGH.bEg--/YXBwaWQ9aGlnaGxhbmRlcjt3PTEyMDA7aD03OTk-/https://media.zenfs.com/en/att_bleacher_report_articles_694/710fafc2d2ceedb1194e5966cb550abc"
+    "name": "Alperen Sengun",
+    "team": "Houston Rockets",
+    "position": "C",
+    "points": 0,
+    "rebounds": 0,
+    "assists": 0,
+    "photo_url": "https://example.com/photos/alperen_sengun.png"
   },
   {
     "id": 2,
-    "name": "Stephen Curry",
-    "team": "Golden State Warriors",
-    "position": "PG",
-    "points": 24.7,
-    "rebounds": 4.7,
-    "assists": 6.4,
-    "photo_url": "https://images.daznservices.com/di/library/sporting_news/3f/3f/stephen-curry-ftr_1brlc3k3jwvwr1fjrw3y1k16pj.jpeg?t=-1655920530&quality=100"
+    "name": "Jalen Green",
+    "team": "Houston Rockets",
+    "position": "G",
+    "points": 0,
+    "rebounds": 0,
+    "assists": 0,
+    "photo_url": "https://example.com/photos/jalen_green.png"
   },
   {
     "id": 3,
-    "name": "Giannis Antetokounmpo",
-    "team": "Milwaukee Bucks",
-    "position": "PF,C",
-    "points": 30.4,
-    "rebounds": 11.9,
-    "assists": 6.5,
-    "photo_url": "https://sports.inquirer.net/files/2021/11/063_1352747760-scaled.jpg"
+    "name": "Fred VanVleet",
+    "team": "Houston Rockets",
+    "position": "G",
+    "points": 0,
+    "rebounds": 0,
+    "assists": 0,
+    "photo_url": "https://example.com/photos/fred_vanvleet.png"
   },
-  { 
+  {
     "id": 4,
-    "name": "Victor Wembanyama",
-    "team": "San Antonio Spurs",
-    "position": "PF,C",
-    "points": 24.3,
-    "rebounds": 11.0,
-    "assists": 3.7,
-    "photo_url": "https://th.bing.com/th/id/OIP.vUO_bbW9Qyv15AHnDg6IAQHaE8?rs=1&pid=ImgDetMain"
+    "name": "Jabari Smith Jr.",
+    "team": "Houston Rockets",
+    "position": "F",
+    "points": 0,
+    "rebounds": 0,
+    "assists": 0,
+    "photo_url": "https://example.com/photos/jabari_smith_jr.png"
+  },
+  {
+    "id": 5,
+    "name": "Dillon Brooks",
+    "team": "Houston Rockets",
+    "position": "F",
+    "points": 0,
+    "rebounds": 0,
+    "assists": 0,
+    "photo_url": "https://example.com/photos/dillon_brooks.png"
+  },
+  {
+    "id": 6,
+    "name": "Amen Thompson",
+    "team": "Houston Rockets",
+    "position": "G/F",
+    "points": 0,
+    "rebounds": 0,
+    "assists": 0,
+    "photo_url": "https://example.com/photos/amen_thompson.png"
+  },
+  {
+    "id": 7,
+    "name": "Cam Whitmore",
+    "team": "Houston Rockets",
+    "position": "F",
+    "points": 0,
+    "rebounds": 0,
+    "assists": 0,
+    "photo_url": "https://example.com/photos/cam_whitmore.png"
+  },
+  {
+    "id": 8,
+    "name": "Tari Eason",
+    "team": "Houston Rockets",
+    "position": "F",
+    "points": 0,
+    "rebounds": 0,
+    "assists": 0,
+    "photo_url": "https://example.com/photos/tari_eason.png"
+  },
+  {
+    "id": 9,
+    "name": "Jeff Green",
+    "team": "Houston Rockets",
+    "position": "F",
+    "points": 0,
+    "rebounds": 0,
+    "assists": 0,
+    "photo_url": "https://example.com/photos/jeff_green.png"
+  },
+  {
+    "id": 10,
+    "name": "Jae'Sean Tate",
+    "team": "Houston Rockets",
+    "position": "F",
+    "points": 0,
+    "rebounds": 0,
+    "assists": 0,
+    "photo_url": "https://example.com/photos/jaesean_tate.png"
+  },
+  {
+    "id": 11,
+    "name": "Aaron Holiday",
+    "team": "Houston Rockets",
+    "position": "G",
+    "points": 0,
+    "rebounds": 0,
+    "assists": 0,
+    "photo_url": "https://example.com/photos/aaron_holiday.png"
+  },
+  {
+    "id": 12,
+    "name": "Jock Landale",
+    "team": "Houston Rockets",
+    "position": "C",
+    "points": 0,
+    "rebounds": 0,
+    "assists": 0,
+    "photo_url": "https://example.com/photos/jock_landale.png"
+  },
+  // Dallas Mavericks (based on 2023-2024 roster)
+  {
+    "id": 13,
+    "name": "Luka Dončić",
+    "team": "Dallas Mavericks",
+    "position": "G/F",
+    "points": 0,
+    "rebounds": 0,
+    "assists": 0,
+    "photo_url": "https://example.com/photos/luka_doncic.png"
+  },
+  {
+    "id": 14,
+    "name": "Kyrie Irving",
+    "team": "Dallas Mavericks",
+    "position": "G",
+    "points": 0,
+    "rebounds": 0,
+    "assists": 0,
+    "photo_url": "https://example.com/photos/kyrie_irving.png"
+  },
+  {
+    "id": 15,
+    "name": "P.J. Washington",
+    "team": "Dallas Mavericks",
+    "position": "F",
+    "points": 0,
+    "rebounds": 0,
+    "assists": 0,
+    "photo_url": "https://example.com/photos/pj_washington.png"
+  },
+  {
+    "id": 16,
+    "name": "Daniel Gafford",
+    "team": "Dallas Mavericks",
+    "position": "C",
+    "points": 0,
+    "rebounds": 0,
+    "assists": 0,
+    "photo_url": "https://example.com/photos/daniel_gafford.png"
+  },
+  {
+    "id": 17,
+    "name": "Dereck Lively II",
+    "team": "Dallas Mavericks",
+    "position": "C",
+    "points": 0,
+    "rebounds": 0,
+    "assists": 0,
+    "photo_url": "https://example.com/photos/dereck_lively_ii.png"
+  },
+  {
+    "id": 18,
+    "name": "Tim Hardaway Jr.",
+    "team": "Dallas Mavericks",
+    "position": "G/F",
+    "points": 0,
+    "rebounds": 0,
+    "assists": 0,
+    "photo_url": "https://example.com/photos/tim_hardaway_jr.png"
+  },
+  {
+    "id": 19,
+    "name": "Josh Green",
+    "team": "Dallas Mavericks",
+    "position": "G",
+    "points": 0,
+    "rebounds": 0,
+    "assists": 0,
+    "photo_url": "https://example.com/photos/josh_green.png"
+  },
+  {
+    "id": 20,
+    "name": "Derrick Jones Jr.",
+    "team": "Dallas Mavericks",
+    "position": "F",
+    "points": 0,
+    "rebounds": 0,
+    "assists": 0,
+    "photo_url": "https://example.com/photos/derrick_jones_jr.png"
+  },
+  {
+    "id": 21,
+    "name": "Maxi Kleber",
+    "team": "Dallas Mavericks",
+    "position": "F/C",
+    "points": 0,
+    "rebounds": 0,
+    "assists": 0,
+    "photo_url": "https://example.com/photos/maxi_kleber.png"
+  },
+  {
+    "id": 22,
+    "name": "Dante Exum",
+    "team": "Dallas Mavericks",
+    "position": "G",
+    "points": 0,
+    "rebounds": 0,
+    "assists": 0,
+    "photo_url": "https://example.com/photos/dante_exum.png"
+  },
+  {
+    "id": 23,
+    "name": "Dwight Powell",
+    "team": "Dallas Mavericks",
+    "position": "F/C",
+    "points": 0,
+    "rebounds": 0,
+    "assists": 0,
+    "photo_url": "https://example.com/photos/dwight_powell.png"
+  },
+  {
+    "id": 24,
+    "name": "Jaden Hardy",
+    "team": "Dallas Mavericks",
+    "position": "G",
+    "points": 0,
+    "rebounds": 0,
+    "assists": 0,
+    "photo_url": "https://example.com/photos/jaden_hardy.png"
   }
 ]
-
-
-
