@@ -1,8 +1,9 @@
 # Entry point for NBA Player Stat Viewer & Simulator
 
 import json
-from flask import Flask, render_template, request, abort
+from flask import Flask, render_template, request, abort, jsonify
 import os
+from basketball_sim import simulate_game
 
 app = Flask(__name__)
 
@@ -80,20 +81,85 @@ def compare():
 @app.route('/simulate', methods=['GET', 'POST'])
 def simulate():
     sim_result = None
-    ai_commentary = get_ai_commentary()
+    ai_commentary = None
+    target_score = 11  # Default target score
+    
     if request.method == 'POST':
         id1 = request.form.get('player1')
         id2 = request.form.get('player2')
         p1 = get_player(id1)
         p2 = get_player(id2)
+        
+        # Get target score if provided
+        if request.form.get('target_score'):
+            try:
+                target_score = int(request.form.get('target_score'))
+            except ValueError:
+                pass  # Use default if invalid
+        
         if p1 and p2:
-            # Dummy simulation: pick winner by higher points
-            winner = p1 if p1['points'] >= p2['points'] else p2
-            sim_result = {'player1': p1, 'player2': p2, 'winner': winner}
-    return render_template('simulate.html', players=players, sim_result=sim_result, ai_commentary=ai_commentary)
+            # Run the advanced simulation
+            game_result = simulate_game(p1, p2, target_score=target_score)
+            
+            # Extract winner from game result
+            winner_name = game_result.get('winner')
+            winner = p1 if winner_name == p1['name'] else p2
+            
+            sim_result = {
+                'player1': p1, 
+                'player2': p2, 
+                'winner': winner,
+                'final_score': game_result.get('final_score'),
+                'game_log': game_result.get('game_log')
+            }
+            
+            # Get AI commentary from the simulation
+            ai_commentary = game_result.get('enhanced_commentary')
+    
+    return render_template('simulate.html', players=players, sim_result=sim_result, 
+                           ai_commentary=ai_commentary, target_score=target_score)
 
 def get_ai_commentary():
-    return 'AI commentary will be added here.'
+    """This function is now deprecated as commentary is generated in the simulation"""
+    return 'AI commentary is now generated as part of the simulation.'
+
+# API endpoint to get simulation results as JSON
+@app.route('/api/simulate', methods=['POST'])
+def api_simulate():
+    data = request.json
+    if not data or 'player1_id' not in data or 'player2_id' not in data:
+        return jsonify({'error': 'Missing player IDs'}), 400
+    
+    p1 = get_player(data['player1_id'])
+    p2 = get_player(data['player2_id'])
+    
+    if not p1 or not p2:
+        return jsonify({'error': 'Player not found'}), 404
+    
+    target_score = data.get('target_score', 11)
+    
+    # Run simulation
+    game_result = simulate_game(p1, p2, target_score=target_score)
+    
+    return jsonify(game_result)
+
+# SQL Injection demonstration endpoint (for educational purposes only)
+@app.route('/error_test')
+def error_test():
+    username = request.args.get('username', '')
+    
+    # WARNING: This is intentionally vulnerable to SQL injection
+    # DO NOT use this pattern in production code
+    query = f"SELECT * FROM users WHERE username = '{username}'"
+    
+    # We're not actually executing the query, just showing it
+    result = {
+        'query': query,
+        'warning': 'This endpoint demonstrates SQL injection vulnerability. DO NOT use this pattern in production.',
+        'proper_way': 'Use parameterized queries instead: cursor.execute("SELECT * FROM users WHERE username = ?", (username,))'
+    }
+    
+    return jsonify(result)
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -1,29 +1,183 @@
 {% extends 'layout.html' %}
 {% block title %}Simulate Matchup - NBA Simulator{% endblock %}
+
+{% block head %}
+<style>
+  .simulation-container {
+    margin-top: 20px;
+  }
+  .player-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+    background-color: #f9f9f9;
+  }
+  .player-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .stat-item {
+    margin: 5px 0;
+  }
+  .winner {
+    border: 2px solid #4CAF50;
+    background-color: #f0fff0;
+  }
+  .game-log {
+    margin: 20px 0;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    max-height: 400px;
+    overflow-y: auto;
+    background-color: #f5f5f5;
+  }
+  .game-log-entry {
+    margin: 8px 0;
+    padding: 5px;
+    border-bottom: 1px solid #eee;
+  }
+  .commentary {
+    margin: 20px 0;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #fff;
+    white-space: pre-line;
+  }
+  .form-group {
+    margin-bottom: 15px;
+  }
+  .vs-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .vs-player {
+    flex: 1;
+    min-width: 300px;
+    margin: 0 10px;
+  }
+  .vs-middle {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    font-size: 24px;
+    font-weight: bold;
+  }
+  .final-score {
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+    margin: 20px 0;
+    padding: 10px;
+    background-color: #f0f0f0;
+    border-radius: 8px;
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-<h2>Simulate Matchup</h2>
-<form method="post">
-  <label for="player1">Player 1:</label>
-  <select name="player1" id="player1">
-    {% for player in players %}
-      <option value="{{ player.id }}">{{ player.name }}</option>
-    {% endfor %}
-  </select>
-  <label for="player2">Player 2:</label>
-  <select name="player2" id="player2">
-    {% for player in players %}
-      <option value="{{ player.id }}">{{ player.name }}</option>
-    {% endfor %}
-  </select>
-  <button type="submit">Simulate</button>
+<h2>1-on-1 Basketball Simulation</h2>
+
+<form method="post" class="simulation-form">
+  <div class="form-group">
+    <label for="player1">Player 1:</label>
+    <select name="player1" id="player1" class="form-control">
+      {% for player in players %}
+        <option value="{{ player.id }}">{{ player.name }} ({{ player.team }}, {{ player.position }})</option>
+      {% endfor %}
+    </select>
+  </div>
+  
+  <div class="form-group">
+    <label for="player2">Player 2:</label>
+    <select name="player2" id="player2" class="form-control">
+      {% for player in players %}
+        <option value="{{ player.id }}">{{ player.name }} ({{ player.team }}, {{ player.position }})</option>
+      {% endfor %}
+    </select>
+  </div>
+  
+  <div class="form-group">
+    <label for="target_score">Game to (points):</label>
+    <select name="target_score" id="target_score" class="form-control">
+      <option value="11" {% if target_score == 11 %}selected{% endif %}>11</option>
+      <option value="15" {% if target_score == 15 %}selected{% endif %}>15</option>
+      <option value="21" {% if target_score == 21 %}selected{% endif %}>21</option>
+    </select>
+  </div>
+  
+  <button type="submit" class="btn btn-primary">Simulate 1-on-1 Game</button>
 </form>
+
 {% if sim_result %}
-  <h3>Simulation Result:</h3>
-  <ul>
-    <li><strong>{{ sim_result.player1.name }}</strong> vs <strong>{{ sim_result.player2.name }}</strong></li>
-    <li>Winner: <strong>{{ sim_result.winner.name }}</strong></li>
-  </ul>
+  <div class="simulation-container">
+    <h3>Simulation Results</h3>
+    
+    <div class="final-score">
+      Final Score: {{ sim_result.player1.name }} {{ sim_result.final_score[sim_result.player1.name] }} - {{ sim_result.final_score[sim_result.player2.name] }} {{ sim_result.player2.name }}
+    </div>
+    
+    <div class="vs-container">
+      <div class="vs-player">
+        <div class="player-card {% if sim_result.winner.id == sim_result.player1.id %}winner{% endif %}">
+          <h4>{{ sim_result.player1.name }}</h4>
+          <p>{{ sim_result.player1.team }} | {{ sim_result.player1.position }} | {{ sim_result.player1.height }}</p>
+          
+          <div class="player-stats">
+            <div class="stat-item"><strong>Points:</strong> {{ sim_result.player1.points }}</div>
+            <div class="stat-item"><strong>Rebounds:</strong> {{ sim_result.player1.rebounds }}</div>
+            <div class="stat-item"><strong>Assists:</strong> {{ sim_result.player1.assists }}</div>
+            <div class="stat-item"><strong>FG%:</strong> {{ sim_result.player1['Field Goal Percentage (FG%)'] }}%</div>
+            <div class="stat-item"><strong>3P%:</strong> {{ sim_result.player1['Three-Point Percentage (3P%)'] }}%</div>
+            <div class="stat-item"><strong>FT%:</strong> {{ sim_result.player1['Free Throw Percentage (FT%)'] }}%</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="vs-middle">
+        VS
+        <div style="margin-top: 20px;">
+          {% if sim_result.winner %}
+            <div style="text-align: center;">Winner:<br><strong>{{ sim_result.winner.name }}</strong></div>
+          {% endif %}
+        </div>
+      </div>
+      
+      <div class="vs-player">
+        <div class="player-card {% if sim_result.winner.id == sim_result.player2.id %}winner{% endif %}">
+          <h4>{{ sim_result.player2.name }}</h4>
+          <p>{{ sim_result.player2.team }} | {{ sim_result.player2.position }} | {{ sim_result.player2.height }}</p>
+          
+          <div class="player-stats">
+            <div class="stat-item"><strong>Points:</strong> {{ sim_result.player2.points }}</div>
+            <div class="stat-item"><strong>Rebounds:</strong> {{ sim_result.player2.rebounds }}</div>
+            <div class="stat-item"><strong>Assists:</strong> {{ sim_result.player2.assists }}</div>
+            <div class="stat-item"><strong>FG%:</strong> {{ sim_result.player2['Field Goal Percentage (FG%)'] }}%</div>
+            <div class="stat-item"><strong>3P%:</strong> {{ sim_result.player2['Three-Point Percentage (3P%)'] }}%</div>
+            <div class="stat-item"><strong>FT%:</strong> {{ sim_result.player2['Free Throw Percentage (FT%)'] }}%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <h3>Game Log</h3>
+    <div class="game-log">
+      {% for entry in sim_result.game_log %}
+        <div class="game-log-entry">{{ entry.text }}</div>
+      {% endfor %}
+    </div>
+    
+    <h3>AI Commentary</h3>
+    <div class="commentary">
+      {{ ai_commentary }}
+    </div>
+  </div>
 {% endif %}
-<h3>AI Commentary</h3>
-<p>{{ ai_commentary }}</p>
 {% endblock %}
