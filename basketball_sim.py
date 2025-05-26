@@ -355,7 +355,18 @@ class BasketballSimulator:
         
         Please provide an engaging, detailed play-by-play commentary of this game, highlighting key moments,
         player strengths/weaknesses, and tactical decisions. Make it sound like an exciting broadcast.
-        Include an introduction, the play-by-play narrative, and a conclusion with the final result.
+        
+        Format your response with the following requirements:
+        1. Use HTML formatting for better readability
+        2. Use <h3> tags for section headings (Introduction, First Half, Second Half, Conclusion, etc.)
+        3. Use <p> tags for paragraphs
+        4. Use <strong> or <b> tags to emphasize important moments, player names, and scores
+        5. Use <br> tags for line breaks within paragraphs where appropriate
+        6. Create a clear structure with separate sections for introduction, game progression, and conclusion
+        7. Include statistics and highlight key plays in a visually distinct way
+        8. For the final score, make it stand out with bold formatting
+        
+        Include an introduction, the play-by-play narrative organized by game progression, and a conclusion with the final result.
         """
         
         try:
@@ -364,11 +375,49 @@ class BasketballSimulator:
             response = model.generate_content(prompt)
             enhanced_commentary = response.text
             
+            # If the response doesn't contain HTML formatting, add basic formatting
+            if '<' not in enhanced_commentary and '>' not in enhanced_commentary:
+                # Split by double newlines to identify paragraphs
+                paragraphs = enhanced_commentary.split('\n\n')
+                formatted_text = []
+                
+                # Process each paragraph
+                for i, para in enumerate(paragraphs):
+                    if i == 0:  # First paragraph is likely the introduction
+                        formatted_text.append(f"<h3>Game Introduction</h3>\n<p>{para}</p>")
+                    elif i == len(paragraphs) - 1:  # Last paragraph is likely the conclusion
+                        formatted_text.append(f"<h3>Game Conclusion</h3>\n<p>{para}</p>")
+                    else:
+                        # Check if paragraph looks like a section header (short and ends with colon)
+                        if len(para) < 50 and para.strip().endswith(':'):
+                            formatted_text.append(f"<h3>{para}</h3>")
+                        else:
+                            # Highlight player names, scores, and key terms
+                            for player_name in [self.player1['name'], self.player2['name']]:
+                                para = para.replace(player_name, f"<strong>{player_name}</strong>")
+                            
+                            # Highlight score mentions
+                            import re
+                            para = re.sub(r'(\d+)-(\d+)', r'<strong>\1-\2</strong>', para)
+                            
+                            # Add paragraph tags
+                            formatted_text.append(f"<p>{para}</p>")
+                
+                enhanced_commentary = "\n\n".join(formatted_text)
+            
             return enhanced_commentary
         except Exception as e:
             # Fallback if API fails
             print(f"Error calling Gemini API: {e}")
-            return "\n".join([entry['text'] for entry in self.game_log])
+            fallback_text = "<h3>Game Summary</h3>\n"
+            for entry in self.game_log:
+                if entry['type'] == 'intro':
+                    fallback_text += f"<p><strong>Introduction:</strong> {entry['text']}</p>\n"
+                elif entry['type'] == 'conclusion':
+                    fallback_text += f"<p><strong>Conclusion:</strong> {entry['text']}</p>\n"
+                elif entry['type'] in ['shot_made', 'shot_missed', 'block', 'turnover']:
+                    fallback_text += f"<p>{entry['text']}</p>\n"
+            return fallback_text
 
 
 def simulate_game(player1_data, player2_data, target_score=11, make_it_take_it=True, use_gemini=True):
