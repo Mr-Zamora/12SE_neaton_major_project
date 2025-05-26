@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file. This projec
 
 ---
 
+## [0.4.0] — 2025-05-27
+### Added
+- Created AI_ENHANCEMENTS.md with comprehensive AI integration plan
+- Documented 10+ potential AI features with implementation details
+- Added player archetype classification system
+- Implemented player similarity finder based on statistical profiles
+- Added context-aware commentary generation in simulations
+
+### Changed
+- Updated repository remote URL to new GitHub location
+- Improved documentation structure and organization
+- Enhanced error handling for AI features
+
+### Security
+- Added caching strategy for AI-generated content to reduce API costs
+- Implemented rate limiting for AI API calls
+- Added fallback mechanisms for AI service unavailability
+
+---
+
 ## [0.3.0] — 2025-05-26
 ### Added
 - Implemented advanced 1-on-1 basketball simulation with Gemini API integration
