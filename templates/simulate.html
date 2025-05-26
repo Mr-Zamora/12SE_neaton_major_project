@@ -18,6 +18,16 @@
     grid-template-columns: repeat(2, 1fr);
     gap: 10px;
   }
+  .enhanced-stats {
+    margin-top: 15px;
+    padding-top: 10px;
+    border-top: 1px dashed #ccc;
+  }
+  .enhanced-stats h5 {
+    margin-bottom: 10px;
+    color: #444;
+    font-weight: bold;
+  }
   .stat-item {
     margin: 5px 0;
   }
@@ -137,12 +147,22 @@
             <div class="stat-item"><strong>FG%:</strong> {{ sim_result.player1['Field Goal Percentage (FG%)'] }}%</div>
             <div class="stat-item"><strong>3P%:</strong> {{ sim_result.player1['Three-Point Percentage (3P%)'] }}%</div>
             <div class="stat-item"><strong>FT%:</strong> {{ sim_result.player1['Free Throw Percentage (FT%)'] }}%</div>
+            
+            <div class="enhanced-stats" colspan="2">
+              <h5>Enhanced Attributes</h5>
+              <div class="stat-item"><strong>Scoring Efficiency:</strong> {{ "%.1f"|format(sim_result.enhanced_player1.scoring_efficiency) }}</div>
+              <div class="stat-item"><strong>Clutch Rating:</strong> {{ "%.0f"|format(sim_result.enhanced_player1.clutch_rating * 100) }}%</div>
+              <div class="stat-item"><strong>Stamina:</strong> {{ "%.0f"|format(sim_result.enhanced_player1.stamina * 100) }}%</div>
+              <div class="stat-item"><strong>3PT Tendency:</strong> {{ "%.0f"|format(sim_result.enhanced_player1.three_point_tendency * 100) }}%</div>
+              <div class="stat-item"><strong>Est. Blocks:</strong> {{ "%.1f"|format(sim_result.enhanced_player1.estimated_blocks) }}</div>
+              <div class="stat-item"><strong>Est. Steals:</strong> {{ "%.1f"|format(sim_result.enhanced_player1.estimated_steals) }}</div>
+            </div>
           </div>
         </div>
       </div>
       
       <div class="vs-middle">
-        VS
+        <div class="vs-circle">VS</div>
         <div style="margin-top: 20px;">
           {% if sim_result.winner %}
             <div style="text-align: center;">Winner:<br><strong>{{ sim_result.winner.name }}</strong></div>
@@ -162,6 +182,16 @@
             <div class="stat-item"><strong>FG%:</strong> {{ sim_result.player2['Field Goal Percentage (FG%)'] }}%</div>
             <div class="stat-item"><strong>3P%:</strong> {{ sim_result.player2['Three-Point Percentage (3P%)'] }}%</div>
             <div class="stat-item"><strong>FT%:</strong> {{ sim_result.player2['Free Throw Percentage (FT%)'] }}%</div>
+            
+            <div class="enhanced-stats" colspan="2">
+              <h5>Enhanced Attributes</h5>
+              <div class="stat-item"><strong>Scoring Efficiency:</strong> {{ "%.1f"|format(sim_result.enhanced_player2.scoring_efficiency) }}</div>
+              <div class="stat-item"><strong>Clutch Rating:</strong> {{ "%.0f"|format(sim_result.enhanced_player2.clutch_rating * 100) }}%</div>
+              <div class="stat-item"><strong>Stamina:</strong> {{ "%.0f"|format(sim_result.enhanced_player2.stamina * 100) }}%</div>
+              <div class="stat-item"><strong>3PT Tendency:</strong> {{ "%.0f"|format(sim_result.enhanced_player2.three_point_tendency * 100) }}%</div>
+              <div class="stat-item"><strong>Est. Blocks:</strong> {{ "%.1f"|format(sim_result.enhanced_player2.estimated_blocks) }}</div>
+              <div class="stat-item"><strong>Est. Steals:</strong> {{ "%.1f"|format(sim_result.enhanced_player2.estimated_steals) }}</div>
+            </div>
           </div>
         </div>
       </div>

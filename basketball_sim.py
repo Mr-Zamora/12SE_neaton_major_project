@@ -3,12 +3,14 @@ Basketball 1-on-1 Simulation Module
 
 This module simulates a 1-on-1 basketball game between two NBA players
 using their statistics and the Gemini API for generating play-by-play commentary.
+Enhanced with derived player attributes for more realistic gameplay.
 """
 
 import random
 import json
 import google.generativeai as genai
 from config import GEMINI_API_KEY
+from player_enhancer import enhance_player_data
 
 # Configure the Gemini API
 genai.configure(api_key=GEMINI_API_KEY)
@@ -24,8 +26,9 @@ class BasketballSimulator:
             target_score: Points needed to win (default: 11)
             make_it_take_it: If True, scorer keeps possession (default: True)
         """
-        self.player1 = player1
-        self.player2 = player2
+        # Enhance player data with derived attributes
+        self.player1 = enhance_player_data(player1)
+        self.player2 = enhance_player_data(player2)
         self.target_score = target_score
         self.make_it_take_it = make_it_take_it
         
@@ -36,7 +39,7 @@ class BasketballSimulator:
         self.game_over = False
         self.winner = None
         
-        # Calculate derived stats that might be useful
+        # Calculate additional derived stats that might be useful
         self._calculate_derived_stats()
     
     def _calculate_derived_stats(self):
@@ -47,27 +50,24 @@ class BasketballSimulator:
             feet, inches = height_str.replace('"', '').split("'")
             player['height_inches'] = int(feet) * 12 + int(inches) if inches else int(feet) * 12
             
-            # Calculate offensive rating (simple version)
+            # Calculate offensive rating (enhanced version using derived stats)
             player['offensive_rating'] = (
-                player.get('points', 10) * 0.4 + 
-                player.get('Field Goal Percentage (FG%)', 45) * 0.3 +
-                player.get('Three-Point Percentage (3P%)', 33) * 0.3
+                player.get('points', 10) * 0.3 + 
+                player.get('scoring_efficiency', 45) * 0.4 +
+                player.get('usage_rate', 20) * 0.3
             )
             
-            # Calculate defensive rating (simple version)
+            # Calculate defensive rating (enhanced version using derived stats)
             player['defensive_rating'] = (
-                player.get('rebounds', 5) * 0.5 + 
-                player.get('height_inches', 72) / 84 * 50  # Normalize height impact
+                player.get('defensive_impact', 5) * 0.6 + 
+                player.get('height_inches', 72) / 84 * 40  # Normalize height impact
             )
-            
-            # Stamina rating based on MPG
-            player['stamina'] = min(100, player.get('Average Minutes Per Game (MPG)', 25) * 2.5)
             
             # Handle missing stats with reasonable defaults
             if 'Steals Per Game (SPG)' not in player:
-                player['Steals Per Game (SPG)'] = 0.8  # League average
+                player['Steals Per Game (SPG)'] = player.get('estimated_steals', 0.8)
             if 'Blocks Per Game (BPG)' not in player:
-                player['Blocks Per Game (BPG)'] = 0.5  # League average
+                player['Blocks Per Game (BPG)'] = player.get('estimated_blocks', 0.5)
             if 'Turnovers Per Game (TOV)' not in player:
                 player['Turnovers Per Game (TOV)'] = 2.0  # League average
     
@@ -96,79 +96,122 @@ class BasketballSimulator:
         Returns:
             Float representing probability (0-1) of shot success
         """
-        # Base probability from player stats
+        # Base probability from shooting percentages and derived stats
         if shot_type == 'inside':
-            base_prob = offensive_player.get('Field Goal Percentage (FG%)', 45) / 100
+            # Inside shots use FG% as base
+            base_probability = offensive_player.get('Field Goal Percentage (FG%)', 45) / 100
+            # Adjust for height advantage/disadvantage
+            height_factor = 1 + (offensive_player.get('height_inches', 72) - 
+                                defensive_player.get('height_inches', 72)) / 100
+            base_probability *= height_factor
         else:  # outside shot
-            base_prob = offensive_player.get('Three-Point Percentage (3P%)', 33) / 100
+            # Outside shots use 3P% as base and consider three_point_tendency
+            base_probability = offensive_player.get('Three-Point Percentage (3P%)', 33) / 100
+            # Players who take more threes tend to be better at them in game situations
+            tendency_bonus = offensive_player.get('three_point_tendency', 0.3) * 0.1
+            base_probability += tendency_bonus
         
-        # Defensive impact
-        height_diff = defensive_player['height_inches'] - offensive_player['height_inches']
-        height_factor = min(0.15, max(-0.05, height_diff * 0.01))  # Taller defender has advantage
+        # Adjust for offensive vs defensive ratings
+        offensive_rating = offensive_player.get('offensive_rating', 50)
+        defensive_rating = defensive_player.get('defensive_rating', 50)
+        rating_factor = 1 + (offensive_rating - defensive_rating) / 200
         
-        # Defensive impact based on position matchup
-        def_impact = 0.1  # Base defensive impact
-        
-        # Adjust for defender's position and stats
-        if defensive_player.get('position') in ['C', 'PF'] and shot_type == 'inside':
-            def_impact += 0.05  # Big men better at defending inside
-        if defensive_player.get('position') in ['SG', 'SF'] and shot_type == 'outside':
-            def_impact += 0.05  # Wing players better at defending outside
-            
-        # Block chance
-        block_chance = min(0.15, defensive_player.get('Blocks Per Game (BPG)', 0.5) / 10)
+        # Adjust for defensive impact specifically for this shot type
+        if shot_type == 'inside':
+            defense_impact = defensive_player.get('estimated_blocks', 0.5) * 0.05
+        else:
+            defense_impact = defensive_player.get('estimated_steals', 0.8) * 0.03
         
         # Calculate final probability
-        final_prob = base_prob - (def_impact + height_factor + block_chance/2)
+        final_probability = base_probability * rating_factor - defense_impact
         
-        # Ensure probability is within reasonable bounds
-        return max(0.2, min(0.9, final_prob))
+        # Clamp to reasonable range
+        return max(0.1, min(0.9, final_probability))
     
     def _simulate_possession(self):
         """Simulate a single possession in the game."""
         offensive_player = self.possession
         defensive_player = self.player2 if offensive_player == self.player1 else self.player1
         
-        # Check if there's a turnover
-        turnover_chance = offensive_player.get('Turnovers Per Game (TOV)', 2) / 20  # 10% per turnover
-        if random.random() < turnover_chance:
-            action = f"{offensive_player['name']} dribbles, but {defensive_player['name']} pokes the ball away! Turnover!"
-            self.game_log.append({"type": "turnover", "text": action})
+        # Determine if there's a turnover
+        turnover_chance = offensive_player.get('Turnovers Per Game (TOV)', 2.0) / 15
+        steal_chance = defensive_player.get('estimated_steals', 0.8) / 10
+        
+        if random.random() < (turnover_chance + steal_chance):
+            # Turnover occurred
+            if random.random() < (steal_chance / (turnover_chance + steal_chance)):
+                # It was a steal
+                turnover_text = f"{defensive_player['name']} steals the ball from {offensive_player['name']}!"
+            else:
+                # It was an unforced turnover
+                turnover_options = [
+                    f"{offensive_player['name']} loses control of the ball and turns it over.",
+                    f"{offensive_player['name']} steps out of bounds, turning the ball over.",
+                    f"{offensive_player['name']} makes a bad pass that goes out of bounds.",
+                    f"{offensive_player['name']} is called for traveling, turning the ball over."
+                ]
+                turnover_text = random.choice(turnover_options)
+            
+            self.game_log.append({"type": "turnover", "text": turnover_text})
+            
+            # Change possession
             self.possession = defensive_player
-            return {"result": "turnover", "text": action}
+            return
         
-        # Determine shot type based on player position and tendencies
-        inside_shot_tendency = {
-            'C': 0.8, 'PF': 0.7, 'SF': 0.6, 'SG': 0.5, 'PG': 0.5
-        }.get(offensive_player.get('position', 'SF'), 0.6)
+        # Determine shot type (inside or outside) using three_point_tendency
+        outside_shot_chance = offensive_player.get('three_point_tendency', 0.3)
+            
+        shot_type = 'outside' if random.random() < outside_shot_chance else 'inside'
         
-        # Adjust based on player's 3P% vs FG%
-        three_point_skill = offensive_player.get('Three-Point Percentage (3P%)', 33) / 100
-        if three_point_skill > 0.37:  # Good 3-point shooter
-            inside_shot_tendency -= 0.1
-        
-        # Determine if shot is inside or outside
-        shot_type = 'inside' if random.random() < inside_shot_tendency else 'outside'
-        
-        # Get shot success probability
-        success_prob = self._get_shot_success_probability(offensive_player, defensive_player, shot_type)
-        
-        # Check for block
-        block_chance = min(0.2, defensive_player.get('Blocks Per Game (BPG)', 0.5) / 5)
+        # Determine if shot is blocked
+        block_chance = 0
         if shot_type == 'inside':
-            block_chance *= 1.5  # More likely to block inside shots
+            # Inside shots can be blocked
+            block_chance = defensive_player.get('estimated_blocks', 0.5) / 10
+            # Height advantage increases block chance
+            if defensive_player.get('height_inches', 72) > offensive_player.get('height_inches', 72):
+                height_diff = defensive_player.get('height_inches', 72) - offensive_player.get('height_inches', 72)
+                block_chance += height_diff / 200
         
         if random.random() < block_chance:
-            action = self._generate_block_description(offensive_player, defensive_player, shot_type)
-            self.game_log.append({"type": "block", "text": action})
-            self.possession = defensive_player
-            return {"result": "block", "text": action}
+            # Shot is blocked
+            block_text = self._generate_block_description(offensive_player, defensive_player, shot_type)
+            self.game_log.append({"type": "block", "text": block_text})
+            
+            # 50% chance the blocker gains possession, otherwise ball stays with shooter
+            if random.random() < 0.5:
+                self.possession = defensive_player
+            
+            return
+        
+        # Calculate shot success probability
+        success_prob = self._get_shot_success_probability(offensive_player, defensive_player, shot_type)
+        
+        # Adjust for clutch situations (close game in late stages)
+        score_diff = abs(self.score[offensive_player['name']] - self.score[defensive_player['name']])
+        close_game = score_diff <= 2
+        near_end = max(self.score[offensive_player['name']], self.score[defensive_player['name']]) >= (self.target_score - 3)
+        
+        if close_game and near_end:
+            # Clutch situation - adjust based on clutch_rating
+            clutch_factor = offensive_player.get('clutch_rating', 0.5) * 0.2
+            success_prob = success_prob * (1 + clutch_factor)
+        
+        # Adjust for stamina
+        stamina_factor = offensive_player.get('stamina', 1.0) * 0.1
+        success_prob = success_prob * (0.95 + stamina_factor)
         
         # Determine if shot is successful
         shot_successful = random.random() < success_prob
         
-        # Generate description
-        action = self._generate_shot_description(offensive_player, defensive_player, shot_type, shot_successful)
+        # Generate description of the shot
+        shot_description = self._generate_shot_description(
+            offensive_player, defensive_player, shot_type, shot_successful
+        )
+        
+        # Log the shot
+        shot_type_log = "shot_made" if shot_successful else "shot_missed"
+        self.game_log.append({"type": shot_type_log, "text": shot_description})
         
         if shot_successful:
             # Update score
@@ -177,46 +220,50 @@ class BasketballSimulator:
             
             # Check if game is over
             if self.score[offensive_player['name']] >= self.target_score:
-                # Check if we need to win by 2
-                opponent_score = self.score[defensive_player['name']]
-                if self.score[offensive_player['name']] >= opponent_score + 2:
-                    self.game_over = True
-                    self.winner = offensive_player
+                self.game_over = True
+                self.winner = offensive_player['name']
+                
+                # Generate conclusion text
+                conclusion = f"Game over! {offensive_player['name']} wins {self.score[offensive_player['name']]}-{self.score[defensive_player['name']]}!"
+                self.game_log.append({"type": "conclusion", "text": conclusion})
             
-            # Determine next possession
+            # If make-it-take-it rules, offensive player keeps possession
             if not self.make_it_take_it:
                 self.possession = defensive_player
-            # If make_it_take_it, offensive player keeps possession
-            
-            # Add score to action
-            action += f" Score: {self.player1['name']} {self.score[self.player1['name']]}, {self.player2['name']} {self.score[self.player2['name']]}"
-            
-            self.game_log.append({"type": "shot_made", "text": action, "points": points})
-            return {"result": "shot_made", "text": action, "points": points}
         else:
-            # Shot missed, determine rebound
-            offensive_rebound_chance = offensive_player.get('rebounds', 5) / (
-                offensive_player.get('rebounds', 5) + defensive_player.get('rebounds', 5) * 1.5
-            )
+            # Shot missed, determine who gets the rebound using derived offensive/defensive rebound stats
+            if shot_type == 'inside':
+                # Inside shots have different rebound dynamics
+                off_rebound_chance = offensive_player.get('offensive_rebounds', 2) / (
+                    offensive_player.get('offensive_rebounds', 2) + 
+                    defensive_player.get('defensive_rebounds', 5)
+                )
+            else:
+                # Outside shots tend to have longer rebounds
+                off_rebound_chance = offensive_player.get('offensive_rebounds', 1) / (
+                    offensive_player.get('offensive_rebounds', 1) + 
+                    defensive_player.get('defensive_rebounds', 4) * 1.2
+                )
             
-            # Height advantage in rebounding
-            height_diff = offensive_player['height_inches'] - defensive_player['height_inches']
-            offensive_rebound_chance += height_diff * 0.005  # Small adjustment for height
+            # Adjust for height
+            height_advantage = (offensive_player.get('height_inches', 72) - 
+                               defensive_player.get('height_inches', 72)) / 100
+            off_rebound_chance += height_advantage
             
-            # Ensure reasonable bounds
-            offensive_rebound_chance = max(0.2, min(0.7, offensive_rebound_chance))
+            # Clamp to reasonable range
+            off_rebound_chance = max(0.2, min(0.8, off_rebound_chance))
             
-            rebound_player = offensive_player if random.random() < offensive_rebound_chance else defensive_player
-            
-            # Generate rebound description
-            rebound_text = f" {rebound_player['name']} grabs the rebound!"
-            action += rebound_text
-            
-            # Update possession
-            self.possession = rebound_player
-            
-            self.game_log.append({"type": "shot_missed", "text": action})
-            return {"result": "shot_missed", "text": action}
+            if random.random() < off_rebound_chance:
+                # Offensive rebound
+                rebound_text = f"{offensive_player['name']} grabs their own miss!"
+                self.game_log.append({"type": "rebound", "text": rebound_text})
+                # Possession stays with offensive player
+            else:
+                # Defensive rebound
+                rebound_text = f"{defensive_player['name']} secures the defensive rebound."
+                self.game_log.append({"type": "rebound", "text": rebound_text})
+                # Change possession
+                self.possession = defensive_player
     
     def _generate_shot_description(self, offensive_player, defensive_player, shot_type, successful):
         """Generate a descriptive text for a shot attempt."""
@@ -302,33 +349,117 @@ class BasketballSimulator:
     
     def simulate_full_game(self):
         """Simulate the entire game until completion."""
-        # Start the game
-        self.start_game()
+        # Initialize game
+        self.game_log = []
+        self.score = {self.player1['name']: 0, self.player2['name']: 0}
+        self.possession = random.choice([self.player1, self.player2])
+        self.winner = None
         
-        # Simulate possessions until game is over
+        # Start the game with an introduction
+        intro = f"Welcome to this 1v1 showdown between {self.player1['name']} and {self.player2['name']}! "
+        intro += f"First to {self.target_score} points wins, and we're playing {'make it, take it' if self.make_it_take_it else 'alternating possession'} rules. "
+        intro += f"{self.possession['name']} wins the tip and will start with the ball."
+        self.game_log.append({"type": "intro", "text": intro})
+        
+        # Track fatigue
+        fatigue = {self.player1['name']: 0, self.player2['name']: 0}
+        
+        # Simulate possessions until target score is reached
         possession_count = 0
-        while not self.game_over and possession_count < 100:  # Safety limit
+        alternate_possession = not self.make_it_take_it
+        
+        while max(self.score.values()) < self.target_score and possession_count < 100:  # Safety limit
             possession_count += 1
             
+            # Get current players
+            offensive_player = self.possession
+            defensive_player = self.player2 if offensive_player == self.player1 else self.player1
+            
             # Add "checks the ball" action every possession
-            check_ball = f"{self.possession['name']} checks the ball at the top of the key."
+            check_ball = f"{offensive_player['name']} checks the ball at the top of the key."
             self.game_log.append({"type": "check_ball", "text": check_ball})
             
-            # Simulate the possession
-            self._simulate_possession()
+            # Apply fatigue effects (players get tired as game progresses)
+            fatigue_factor = 1.0 - (fatigue[offensive_player['name']] * 0.01 * (1.0 / offensive_player.get('stamina', 1.0)))
+            
+            # Determine if there's a turnover
+            turnover_chance = 0.05 + (offensive_player.get('Turnovers Per Game (TOV)', 2.0) / 40)
+            if random.random() < turnover_chance:
+                turnover_text = f"{offensive_player['name']} loses control of the ball! Turnover to {defensive_player['name']}."
+                self.game_log.append({"type": "turnover", "text": turnover_text})
+                self.possession = defensive_player
+                continue
+            
+            # Determine shot type based on player position and tendencies
+            shot_type_odds = 0.7  # Base chance for inside shot
+            if offensive_player['position'] in ['PG', 'SG', 'SF']:
+                shot_type_odds = 0.5  # Guards and wings take more outside shots
+            
+            # Adjust based on three-point percentage
+            three_pt_pct = offensive_player.get('Three-Point Percentage (3P%)', 30.0)
+            if three_pt_pct > 35:  # Good three-point shooters
+                shot_type_odds -= 0.1
+            
+            shot_type = 'inside' if random.random() < shot_type_odds else 'outside'
+            
+            # Calculate success probability
+            success_prob = self._get_shot_success_probability(offensive_player, defensive_player, shot_type)
+            
+            # Apply fatigue factor
+            success_prob *= fatigue_factor
+            
+            # Determine if shot is successful
+            shot_successful = random.random() < success_prob
+            
+            # Generate description and update game state
+            shot_description = self._generate_shot_description(offensive_player, defensive_player, shot_type, shot_successful)
+            
+            if shot_successful:
+                # Award points
+                points = 1 if shot_type == 'inside' else 2
+                self.score[offensive_player['name']] += points
+                
+                # Add to game log
+                shot_text = f"{shot_description} {offensive_player['name']} scores! "
+                shot_text += f"Score: {offensive_player['name']} {self.score[offensive_player['name']]}, {defensive_player['name']} {self.score[defensive_player['name']]}."
+                self.game_log.append({"type": "shot_made", "text": shot_text})
+                
+                # Check if game is over
+                if self.score[offensive_player['name']] >= self.target_score:
+                    self.winner = offensive_player
+                    break
+                
+                # Determine next possession
+                if not alternate_possession:  # Make it, take it
+                    pass  # Keep possession
+                else:
+                    self.possession = defensive_player
+            else:
+                # Shot missed, defensive player gets rebound
+                rebound_text = f"{shot_description} {defensive_player['name']} grabs the rebound."
+                self.game_log.append({"type": "shot_missed", "text": rebound_text})
+                self.possession = defensive_player
+            
+            # Increase fatigue
+            fatigue[offensive_player['name']] += 0.5
+            fatigue[defensive_player['name']] += 0.3
         
         # Generate game conclusion
         if self.winner:
-            conclusion = f"Game over! {self.winner['name']} wins {self.score[self.winner['name']]} to {self.score[self.player2['name'] if self.winner == self.player1 else self.player1['name']]}!"
+            loser = self.player2 if self.winner == self.player1 else self.player1
+            conclusion = f"Game over! {self.winner['name']} wins {self.score[self.winner['name']]} to {self.score[loser['name']]}!"
             self.game_log.append({"type": "conclusion", "text": conclusion})
         else:
             conclusion = "The game reached the maximum number of possessions without a winner."
             self.game_log.append({"type": "conclusion", "text": conclusion})
         
+        # Return game result
         return {
             "game_log": self.game_log,
             "final_score": self.score,
-            "winner": self.winner['name'] if self.winner else None
+            "winner": self.winner['name'] if self.winner else None,
+            "player1": self.player1,
+            "player2": self.player2
         }
     
     def get_enhanced_commentary(self):
@@ -433,11 +564,15 @@ def simulate_game(player1_data, player2_data, target_score=11, make_it_take_it=T
     Returns:
         Dictionary containing game results and commentary
     """
-    # Create simulator
+    # Create simulator (player enhancement happens in the constructor)
     simulator = BasketballSimulator(player1_data, player2_data, target_score, make_it_take_it)
     
     # Run simulation
     game_result = simulator.simulate_full_game()
+    
+    # Add enhanced player attributes to the result for display
+    game_result['enhanced_player1'] = simulator.player1
+    game_result['enhanced_player2'] = simulator.player2
     
     # Get enhanced commentary if requested
     if use_gemini:

@@ -4,6 +4,7 @@ import json
 from flask import Flask, render_template, request, abort, jsonify
 import os
 from basketball_sim import simulate_game
+from player_enhancer import enhance_player_data
 
 app = Flask(__name__)
 
@@ -105,9 +106,15 @@ def simulate():
             winner_name = game_result.get('winner')
             winner = p1 if winner_name == p1['name'] else p2
             
+            # Get enhanced player data from the simulation
+            enhanced_p1 = game_result.get('enhanced_player1', p1)
+            enhanced_p2 = game_result.get('enhanced_player2', p2)
+            
             sim_result = {
                 'player1': p1, 
-                'player2': p2, 
+                'player2': p2,
+                'enhanced_player1': enhanced_p1,
+                'enhanced_player2': enhanced_p2, 
                 'winner': winner,
                 'final_score': game_result.get('final_score'),
                 'game_log': game_result.get('game_log')
@@ -138,7 +145,7 @@ def api_simulate():
     
     target_score = data.get('target_score', 11)
     
-    # Run simulation
+    # Run simulation with enhanced player data
     game_result = simulate_game(p1, p2, target_score=target_score)
     
     return jsonify(game_result)
