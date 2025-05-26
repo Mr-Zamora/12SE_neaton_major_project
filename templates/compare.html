@@ -1,29 +1,59 @@
 {% extends 'layout.html' %}
 {% block title %}Compare Players - NBA Simulator{% endblock %}
 {% block content %}
-<h2>Compare Players</h2>
-<form method="post">
-  <label for="player1">Player 1:</label>
-  <select name="player1" id="player1">
-    {% for player in players %}
-      <option value="{{ player.id }}">{{ player.name }}</option>
-    {% endfor %}
-  </select>
-  <label for="player2">Player 2:</label>
-  <select name="player2" id="player2">
-    {% for player in players %}
-      <option value="{{ player.id }}">{{ player.name }}</option>
-    {% endfor %}
-  </select>
-  <button type="submit">Compare</button>
-</form>
-{% if result %}
-  <h3>Comparison Result:</h3>
-  <ul>
-    <li><strong>{{ result.player1.name }}</strong> vs <strong>{{ result.player2.name }}</strong></li>
-    <li>Points: {{ result.player1.points }} vs {{ result.player2.points }}</li>
-    <li>Rebounds: {{ result.player1.rebounds }} vs {{ result.player2.rebounds }}</li>
-    <li>Assists: {{ result.player1.assists }} vs {{ result.player2.assists }}</li>
-  </ul>
-{% endif %}
+<div class="container">
+    <h2 class="text-center">Compare Players</h2>
+    <form method="post" class="compare-form">
+        <div class="form-group">
+            <label for="player1">Player 1</label>
+            <select name="player1" id="player1" class="player-select">
+                {% for player in players %}
+                    <option value="{{ player.id }}">{{ player.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="vs-container">
+            <span class="vs-text">VS</span>
+        </div>
+        
+        <div class="form-group">
+            <label for="player2">Player 2</label>
+            <select name="player2" id="player2" class="player-select">
+                {% for player in players %}
+                    <option value="{{ player.id }}">{{ player.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn-primary">Compare Players</button>
+        </div>
+    </form>
+    
+    {% if result %}
+    <div class="comparison-results card">
+        <h3>Comparison Results</h3>
+        <div class="players-comparison">
+            <div class="player-stats">
+                <h4>{{ result.player1.name }}</h4>
+                <ul class="stats-list">
+                    <li><span class="stat-label">Points:</span> <span class="stat-value">{{ result.player1.points }}</span></li>
+                    <li><span class="stat-label">Rebounds:</span> <span class="stat-value">{{ result.player1.rebounds }}</span></li>
+                    <li><span class="stat-label">Assists:</span> <span class="stat-value">{{ result.player1.assists }}</span></li>
+                </ul>
+            </div>
+            <div class="vs-circle">VS</div>
+            <div class="player-stats">
+                <h4>{{ result.player2.name }}</h4>
+                <ul class="stats-list">
+                    <li><span class="stat-label">Points:</span> <span class="stat-value">{{ result.player2.points }}</span></li>
+                    <li><span class="stat-label">Rebounds:</span> <span class="stat-value">{{ result.player2.rebounds }}</span></li>
+                    <li><span class="stat-label">Assists:</span> <span class="stat-value">{{ result.player2.assists }}</span></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
 {% endblock %}

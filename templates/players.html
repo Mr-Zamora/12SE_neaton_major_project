@@ -1,12 +1,94 @@
 {% extends 'layout.html' %}
 {% block title %}Players - NBA Simulator{% endblock %}
 {% block content %}
-<h2>All NBA Players</h2>
-<ul>
-  {% for player in players %}
-    <li>
-      <a href="/player/{{ player.id }}">{{ player.name }}</a> - {{ player.team }} ({{ player.position }})
-    </li>
-  {% endfor %}
-</ul>
+<div class="container mt-4">
+    <h2 class="text-center mb-4">NBA Players by Team</h2>
+    
+    <style>
+        .team-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .team-header {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            background: #1d428a;
+            color: white;
+            margin-bottom: 0;
+        }
+        .team-logo {
+            width: 50px;
+            height: 50px;
+            margin-right: 15px;
+            object-fit: contain;
+        }
+        .team-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 0;
+        }
+        .player-list {
+            padding: 15px;
+        }
+        .player-item {
+            padding: 10px 15px;
+            border-bottom: 1px solid #eee;
+            transition: background-color 0.2s;
+        }
+        .player-item:last-child {
+            border-bottom: none;
+        }
+        .player-item:hover {
+            background-color: #f1f1f1;
+        }
+        .player-link {
+            color: #333;
+            text-decoration: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .player-position {
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+    </style>
+
+    {% set teams = {} %}
+    {% for player in players %}
+        {% if player.team not in teams %}
+            {% set _ = teams.update({player.team: []}) %}
+        {% endif %}
+        {% set _ = teams[player.team].append(player) %}
+    {% endfor %}
+
+    <div class="row">
+        {% for team, players_in_team in teams.items() %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="team-section">
+                <div class="team-header">
+                    <div class="team-logo">
+                        {{ get_team_logo(team) | safe }}
+                    </div>
+                    <h3 class="team-name">{{ team }}</h3>
+                </div>
+                <div class="player-list">
+                    {% for player in players_in_team|sort(attribute='name') %}
+                    <div class="player-item">
+                        <a href="/player/{{ player.id }}" class="player-link">
+                            <span>{{ player.name }}</span>
+                            <span class="player-position">{{ player.position }}</span>
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
 {% endblock %}

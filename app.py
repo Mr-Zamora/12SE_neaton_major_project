@@ -17,6 +17,39 @@ def get_player(player_id):
             return player
     return None
 
+# Helper: get team logo as SVG
+def get_team_logo(team_name):
+    # Check for specific teams to use their official colors
+    team_colors = {
+        'New York Knicks': 'F58426',  # Knicks Orange
+        'Dallas Mavericks': '0053BC',  # Mavericks Blue
+        'Houston Rockets': 'CE1141',   # Rockets Red
+        'Minnesota Timberwolves': '0C2340'  # Timberwolves Midnight Blue
+    }
+    
+    # Use the team's color if defined, otherwise generate a consistent color
+    if team_name in team_colors:
+        color = team_colors[team_name]
+    else:
+        import hashlib
+        color = hashlib.md5(team_name.encode()).hexdigest()[:6]
+    
+    # Get the first letter of the team name
+    first_letter = team_name[0].upper()
+    
+    # Create a simple SVG logo
+    svg = f'''
+    <svg width="50" height="50" viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg">
+        <rect width="50" height="50" rx="25" fill="#{color}" opacity="0.8"/>
+        <text x="25" y="32" font-family="Arial, sans-serif" font-size="24" 
+              font-weight="bold" text-anchor="middle" fill="white">{first_letter}</text>
+    </svg>
+    '''
+    return svg.strip()
+
+# Register the function to be available in templates
+app.jinja_env.globals.update(get_team_logo=get_team_logo)
+
 @app.route('/')
 def home():
     return render_template('home.html')

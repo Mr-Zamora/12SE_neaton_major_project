@@ -1,6 +1,41 @@
 {% extends 'layout.html' %}
 {% block title %}Home - NBA Simulator{% endblock %}
 {% block content %}
-<h2>Welcome to the NBA Player Stat Viewer & Simulator!</h2>
-<p>Use the navigation above to explore player stats, compare players, or simulate matchups.</p>
+<div class="hero">
+    <div class="hero-content">
+        <h1><span class="nba-blue">NBA</span> <span class="nba-red">Simulator</span></h1>
+        <p class="tagline">Experience the game like never before</p>
+        <div class="cta-buttons">
+            <a href="/players" class="btn btn-primary">View Players</a>
+            <a href="/simulate" class="btn btn-secondary">Simulate Game</a>
+        </div>
+    </div>
+</div>
+
+<div class="features">
+    <div class="feature-card">
+        <i class="fas fa-basketball-ball"></i>
+        <h3>Player Stats</h3>
+        <p>Explore comprehensive player statistics and career highlights</p>
+    </div>
+    <div class="feature-card">
+        <i class="fas fa-trophy"></i>
+        <h3>Game Simulation</h3>
+        <p>Simulate matchups between your favorite teams and players</p>
+    </div>
+    <div class="feature-card">
+        <i class="fas fa-chart-line"></i>
+        <h3>Advanced Analytics</h3>
+        <p>Dive deep into advanced metrics and performance analysis</p>
+    </div>
+</div>
+
+<div class="newsletter">
+    <h3>Stay Updated</h3>
+    <p>Subscribe to our newsletter for the latest updates and features</p>
+    <form class="newsletter-form">
+        <input type="email" placeholder="Enter your email" required>
+        <button type="submit" class="btn btn-primary">Subscribe</button>
+    </form>
+</div>
 {% endblock %}

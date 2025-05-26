@@ -1,14 +1,69 @@
 {% extends 'layout.html' %}
-{% block title %}Player Detail - NBA Simulator{% endblock %}
+{% block title %}{{ player.name }} - NBA Simulator{% endblock %}
 {% block content %}
-<h2>{{ player.name }}</h2>
-<img src="{{ player.photo_url }}" alt="{{ player.name }}" width="150">
-<ul>
-  <li><strong>Team:</strong> {{ player.team }}</li>
-  <li><strong>Position:</strong> {{ player.position }}</li>
-  <li><strong>Points:</strong> {{ player.points }}</li>
-  <li><strong>Rebounds:</strong> {{ player.rebounds }}</li>
-  <li><strong>Assists:</strong> {{ player.assists }}</li>
-</ul>
-<a href="/players">Back to Players</a>
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-4 text-center">
+            <img src="{{ player.photo_url }}" alt="{{ player.name }}" class="img-fluid rounded mb-3" style="max-width: 300px;">
+            <h2>{{ player.name }}</h2>
+            <p class="lead">{{ player.team }} | {{ player.position }} | {{ player.height }}</p>
+        </div>
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="mb-0">Player Statistics</h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <tbody>
+                                <tr>
+                                    <th>Points Per Game</th>
+                                    <td>{{ player.points }}</td>
+                                    <th>Field Goal %</th>
+                                    <td>{{ player['Field Goal Percentage (FG%)'] }}%</td>
+                                </tr>
+                                <tr>
+                                    <th>Rebounds Per Game</th>
+                                    <td>{{ player.rebounds }}</td>
+                                    <th>3-Point %</th>
+                                    <td>{{ player['Three-Point Percentage (3P%)'] }}%</td>
+                                </tr>
+                                <tr>
+                                    <th>Assists Per Game</th>
+                                    <td>{{ player.assists }}</td>
+                                    <th>Free Throw %</th>
+                                    <td>{{ player['Free Throw Percentage (FT%)'] }}%</td>
+                                </tr>
+                                <tr>
+                                    <th>Minutes Per Game</th>
+                                    <td>{{ player['Average Minutes Per Game (MPG)'] }}</td>
+                                    <th>True Shooting %</th>
+                                    <td>{{ player['True Shooting Percentage (TS%)'] }}%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="mt-3">
+        <a href="/players" class="btn btn-primary">
+            <i class="bi bi-arrow-left"></i> Back to Players
+        </a>
+    </div>
+</div>
+
+<style>
+    .card {
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+    th {
+        width: 35%;
+    }
+    td {
+        width: 15%;
+    }
+</style>
 {% endblock %}
